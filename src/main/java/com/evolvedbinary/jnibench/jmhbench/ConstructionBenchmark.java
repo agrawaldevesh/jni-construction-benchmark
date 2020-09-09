@@ -14,16 +14,16 @@ public class ConstructionBenchmark {
 
     @State(Scope.Benchmark)
     public static class BenchmarkState {
-        @Param({"16384"})
+        @Param({"1", "16384"})
         public int batchSize;
 
         @Param({"32", "1024"})
         public int stringSize;
 
-        @Param({"false"})
+        @Param({"false", "true"})
         public boolean postProcess;
 
-        public int numStrings = 256;
+        public int numStrings = 4096;
 
         StringProvider stringProvider;
 
