@@ -40,8 +40,8 @@
     </licenses>
 
     <properties>
-        <java.source.version>1.7</java.source.version>
-        <java.target.version>1.7</java.target.version>
+        <java.source.version>1.8</java.source.version>
+        <java.target.version>1.8</java.target.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <jmh.version>1.22</jmh.version>
@@ -69,8 +69,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.source.version}</source>
-                    <target>${java.target.version}</target>
+                    <source>8</source>
+                    <target>8</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -89,8 +89,9 @@
                     </libraries>
                     <cpp>
                         <options>
-                            <option>-std=c++11</option>
+                            <option>-std=c++17</option>
                             <option>-O3</option>
+                            <option>-g</option>
                         </options>
                     </cpp>
                 </configuration>

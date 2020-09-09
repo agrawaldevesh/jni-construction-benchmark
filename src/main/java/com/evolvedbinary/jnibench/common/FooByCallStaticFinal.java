@@ -37,6 +37,11 @@ public final class FooByCallStaticFinal extends NativeBackedObject {
         this._nativeHandle = newFoo();
     }
 
+    public FooByCallStaticFinal(boolean ignored) {
+        super();
+        this._nativeHandle = 0;
+    }
+
     @Override
     protected void disposeInternal() {
         disposeInternal(_nativeHandle);
@@ -44,4 +49,6 @@ public final class FooByCallStaticFinal extends NativeBackedObject {
 
     private static native long newFoo();
     private static native void disposeInternal(final long handle);
+    public static native long getStringFromJava(StringProvider provider, int numTimes);
+    public static native long getStringFromJavaNoWork(StringProvider provider, int numTimes);
 }

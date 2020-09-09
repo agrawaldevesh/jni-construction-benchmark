@@ -24,9 +24,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include <cstring>
 #include <jni.h>
 #include "com_evolvedbinary_jnibench_common_FooByCallStaticFinal.h"
 #include "Foo.h"
+
+#define ERROR_IF_EXCEPTION_PENDING(env)          \
+  do {                                           \
+    jthrowable exc = (env)->ExceptionOccurred(); \
+    if (exc != nullptr) {                        \
+      return 0L;                                 \
+    }                                            \
+  } while (false)
 
 /*
  * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
@@ -45,4 +54,64 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_newFoo(JNIEnv*
  */
 void Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_disposeInternal(JNIEnv* env, jclass jcls, jlong handle) {
     delete reinterpret_cast<jnibench::Foo*>(handle);
+}
+
+/*
+ * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
+ * Method:    getStringFromJava
+ */
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJava(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProvider");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetMethodID(objClass, "getString", "(I)Ljava/lang/String;");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jstring jfilename = static_cast<jstring>(env->CallObjectMethod(obj, method_handle, i));
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (jfilename == nullptr) {
+        return 0;
+      }
+      const char* filename = env->GetStringUTFChars(jfilename, nullptr);
+      if (filename == nullptr) {
+        return 0;
+      }
+      accum += strlen(filename);
+      env->ReleaseStringUTFChars(jfilename, filename);
+    }
+    return static_cast<jlong>(accum);
+}
+
+/*
+ * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
+ * Method:    getStringFromJava
+ */
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJavaNoWork(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProvider");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetMethodID(objClass, "getString", "(I)Ljava/lang/String;");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jstring jfilename = static_cast<jstring>(env->CallObjectMethod(obj, method_handle, i));
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (jfilename == nullptr) {
+        return 0;
+      }
+      int size = static_cast<int>(env->GetStringLength(jfilename));
+      const jchar* chars = env->GetStringChars(jfilename, nullptr);
+      jchar scan = static_cast<jchar>(0);
+      for (int j = 0; j < size; ++j) {
+//        if (j > 0 && chars[j] != chars[j - 1]) {
+            scan ^= chars[j];
+//        }
+      }
+      accum += size;
+      scans += scan;
+      env->ReleaseStringChars(jfilename, chars);
+    }
+    return static_cast<jlong>(accum & scans);
 }
