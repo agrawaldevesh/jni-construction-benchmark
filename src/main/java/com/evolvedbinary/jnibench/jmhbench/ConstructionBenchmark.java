@@ -49,6 +49,28 @@ public class ConstructionBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void getBytesFromJava(Blackhole blackhole, BenchmarkState state) {
+        FooByCallStaticFinal thing = new FooByCallStaticFinal(false);
+        blackhole.consume(thing.getBytesFromJava(state.stringProvider, state.batchSize));
+        blackhole.consume(state.stringProvider.getInteresting());
+    }
+
+    @Fork
+    @Warmup
+    @Benchmark
+    @BenchmarkMode(Mode.SampleTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public void getUTF8StringFromJava(Blackhole blackhole, BenchmarkState state) {
+        FooByCallStaticFinal thing = new FooByCallStaticFinal(false);
+        blackhole.consume(thing.getUTF8StringFromJava(state.stringProvider, state.batchSize));
+        blackhole.consume(state.stringProvider.getInteresting());
+    }
+
+    @Fork
+    @Warmup
+    @Benchmark
+    @BenchmarkMode(Mode.SampleTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public void getStringFromJavaNoWork(Blackhole blackhole, BenchmarkState state) {
         FooByCallStaticFinal thing = new FooByCallStaticFinal(false);
         blackhole.consume(thing.getStringFromJavaNoWork(state.stringProvider, state.batchSize));

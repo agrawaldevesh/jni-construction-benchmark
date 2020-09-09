@@ -50,5 +50,7 @@ public final class FooByCallStaticFinal extends NativeBackedObject {
     private static native long newFoo();
     private static native void disposeInternal(final long handle);
     public static native long getStringFromJava(StringProvider provider, int numTimes);
+    public static native long getUTF8StringFromJava(StringProvider provider, int numTimes);
+    public static native long getBytesFromJava(StringProvider provider, int numTimes);
     public static native long getStringFromJavaNoWork(StringProvider provider, int numTimes);
 }
