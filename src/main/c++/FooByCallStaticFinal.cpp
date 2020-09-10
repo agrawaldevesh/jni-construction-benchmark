@@ -154,7 +154,7 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getBytesFromJa
  * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
  * Method:    getStringFromJava
  */
-jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJavaNoWork(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJavaAsNativeUTF16(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
     int numTimes = static_cast<int>(numtimes);
     long accum = 1;
     long scans = 1;

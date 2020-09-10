@@ -52,5 +52,5 @@ public final class FooByCallStaticFinal extends NativeBackedObject {
     public static native long getStringFromJava(StringProvider provider, int numTimes);
     public static native long getUTF8StringFromJava(StringProvider provider, int numTimes);
     public static native long getBytesFromJava(StringProvider provider, int numTimes);
-    public static native long getStringFromJavaNoWork(StringProvider provider, int numTimes);
+    public static native long getStringFromJavaAsNativeUTF16(StringProvider provider, int numTimes);
 }

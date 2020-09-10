@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// Copied from UTF8StringBuilder in Spark
+
 package com.evolvedbinary.jnibench.common;
 
 /**

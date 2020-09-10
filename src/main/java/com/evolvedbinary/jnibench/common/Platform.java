@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// Copied from Platform in Spark
+
 package com.evolvedbinary.jnibench.common;
 
 import java.lang.reflect.Constructor;

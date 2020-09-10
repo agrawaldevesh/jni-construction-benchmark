@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+// Copied from same file in Spark
+
 package com.evolvedbinary.jnibench.common;
 
 /**

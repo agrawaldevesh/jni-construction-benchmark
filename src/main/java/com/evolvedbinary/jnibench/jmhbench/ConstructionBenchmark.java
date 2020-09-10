@@ -71,9 +71,9 @@ public class ConstructionBenchmark {
     @Benchmark
     @BenchmarkMode(Mode.SampleTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
-    public void getStringFromJavaNoWork(Blackhole blackhole, BenchmarkState state) {
+    public void getStringFromJavaAsNativeUTF16(Blackhole blackhole, BenchmarkState state) {
         FooByCallStaticFinal thing = new FooByCallStaticFinal(false);
-        blackhole.consume(thing.getStringFromJavaNoWork(state.stringProvider, state.batchSize));
+        blackhole.consume(thing.getStringFromJavaAsNativeUTF16(state.stringProvider, state.batchSize));
         blackhole.consume(state.stringProvider.getInteresting());
     }
 }
