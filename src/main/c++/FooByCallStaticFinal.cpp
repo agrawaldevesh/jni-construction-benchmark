@@ -25,41 +25,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <cstring>
+#include <cstdint>
+#include <limits>
 #include <jni.h>
+#include <vector>
 #include "com_evolvedbinary_jnibench_common_FooByCallStaticFinal.h"
 #include "Foo.h"
+
+constexpr long ERROR_CODE = 0xf00dBeefDeadBeef;
 
 #define ERROR_IF_EXCEPTION_PENDING(env)          \
   do {                                           \
     jthrowable exc = (env)->ExceptionOccurred(); \
     if (exc != nullptr) {                        \
-      return 0L;                                 \
+      return ERROR_CODE;                                 \
     }                                            \
   } while (false)
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    newFoo
- * Signature: ()J
- */
 jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_newFoo(JNIEnv* env, jclass jcls) {
   jnibench::Foo* foo = new jnibench::Foo();
   return reinterpret_cast<jlong>(foo);
 }
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    disposeInternal
- * Signature: (J)V
- */
 void Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_disposeInternal(JNIEnv* env, jclass jcls, jlong handle) {
     delete reinterpret_cast<jnibench::Foo*>(handle);
 }
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    getStringFromJava
- */
 jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJava(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
     int numTimes = static_cast<int>(numtimes);
     long accum = 1;
@@ -71,11 +62,11 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJ
       jstring jfilename = static_cast<jstring>(env->CallObjectMethod(obj, method_handle, i));
       ERROR_IF_EXCEPTION_PENDING(env);
       if (jfilename == nullptr) {
-        return 0;
+        return ERROR_CODE;
       }
       const char* filename = env->GetStringUTFChars(jfilename, nullptr);
       if (filename == nullptr) {
-        return 0;
+        return ERROR_CODE;
       }
       accum += strlen(filename);
       env->ReleaseStringUTFChars(jfilename, filename);
@@ -83,10 +74,6 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJ
     return static_cast<jlong>(accum);
 }
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    getStringFromJava
- */
 jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getUTF8StringFromJava(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
     int numTimes = static_cast<int>(numtimes);
     long accum = 1;
@@ -103,7 +90,7 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getUTF8StringF
       jobject utf8String = env->CallObjectMethod(obj, method_handle, i);
       ERROR_IF_EXCEPTION_PENDING(env);
       if (utf8String == nullptr) {
-        return 0;
+        return ERROR_CODE;
       }
       jbyteArray bytesObj = static_cast<jbyteArray>(env->CallObjectMethod(utf8String, bytes_method_handle));
       jbyte* chars = env->GetByteArrayElements(bytesObj, nullptr);
@@ -119,10 +106,6 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getUTF8StringF
     return static_cast<jlong>(accum & scans);
 }
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    getStringFromJava
- */
 jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getBytesFromJava(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
     int numTimes = static_cast<int>(numtimes);
     long accum = 1;
@@ -135,7 +118,7 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getBytesFromJa
       jbyteArray bytesObj = static_cast<jbyteArray>(env->CallObjectMethod(obj, method_handle, i));
       ERROR_IF_EXCEPTION_PENDING(env);
       if (bytesObj == nullptr) {
-        return 0;
+        return ERROR_CODE;
       }
       jbyte* chars = env->GetByteArrayElements(bytesObj, nullptr);
       int size = static_cast<int>(env->GetArrayLength(bytesObj));
@@ -150,10 +133,206 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getBytesFromJa
     return static_cast<jlong>(accum & scans);
 }
 
-/*
- * Class:     com_evolvedbinary_jnibench_common_FooByCallStaticFinal
- * Method:    getStringFromJava
- */
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticBytesFromJava(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getByteString", "(I)[B");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jbyteArray bytesObj = static_cast<jbyteArray>(env->CallStaticObjectMethod(objClass, method_handle, i));
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (bytesObj == nullptr) {
+        return ERROR_CODE;
+      }
+      jbyte* chars = env->GetByteArrayElements(bytesObj, nullptr);
+      int size = static_cast<int>(env->GetArrayLength(bytesObj));
+      jbyte scan = static_cast<jbyte>(0);
+      for (int j = 0; j < size; ++j) {
+        scan ^= chars[j];
+      }
+      accum += size;
+      scans += scan;
+      env->ReleaseByteArrayElements(bytesObj, chars, JNI_ABORT);
+    }
+    return static_cast<jlong>(accum & scans);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticNativePreallocatedFromJava(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getByteNativePreallocated", "(I)J");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID length_method_handle = env->GetStaticMethodID(objClass, "getByteLength", "(I)I");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jlong nativeBytes = env->CallStaticLongMethod(objClass, method_handle, i);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (nativeBytes <= 0) {
+        return ERROR_CODE;
+      }
+      jint nativeBytesLength = env->CallStaticIntMethod(objClass, length_method_handle, i);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (nativeBytesLength <= 0) {
+        return ERROR_CODE;
+      }
+      jbyte* chars = reinterpret_cast<jbyte*>(nativeBytes);
+      int size = nativeBytesLength;
+      jbyte scan = static_cast<jbyte>(0);
+      for (int j = 0; j < size; ++j) {
+        scan ^= chars[j];
+      }
+      accum += size;
+      scans += scan;
+    }
+    return static_cast<jlong>(accum & scans);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticNativePreallocatedWithSizeFromJava(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getByteNativePreallocatedWithSize", "(IJ)V");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    long withLength[2] = {0L, 0L};
+    jlong addressOfWithLength = reinterpret_cast<jlong>(withLength);
+    long max_int = std::numeric_limits<int>::max();
+    for (int i = 0; i < numTimes; ++i) {
+      env->CallStaticVoidMethod(objClass, method_handle, i, addressOfWithLength);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      long nativeBytes = withLength[0];
+      long nativeBytesLength = withLength[1];
+      if (nativeBytes <= 0 || nativeBytesLength <= 0 || nativeBytesLength >= max_int) {
+        return ERROR_CODE;
+      }
+      jbyte* chars = reinterpret_cast<jbyte*>(nativeBytes);
+      int size = static_cast<int>(nativeBytesLength);
+      jbyte scan = static_cast<jbyte>(0);
+      for (int j = 0; j < size; ++j) {
+        scan ^= chars[j];
+      }
+      accum += size;
+      scans += scan;
+    }
+    return static_cast<jlong>(accum & scans);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticByteNativeCallerAllocated(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getByteNativeCallerAllocated", "(IJI)I");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    std::vector<jbyte> storage;
+    storage.reserve(100);
+    for (int i = 0; i < numTimes; ++i) {
+      jlong addr = reinterpret_cast<jlong>(storage.data());
+      int capacity = static_cast<int>(storage.capacity());
+      jint copied = env->CallStaticIntMethod(objClass, method_handle, i, addr, capacity);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (copied < 0) {
+        size_t newSize = 2 * (-copied);
+        if (newSize <= 0) {
+            return ERROR_CODE;
+        }
+        storage.reserve(newSize);
+        --i;
+        continue;
+      }
+      if (copied == 0) {
+        return ERROR_CODE;
+      }
+      const jbyte* chars = storage.data();
+      int size = static_cast<int>(copied);
+      jbyte scan = static_cast<jbyte>(0);
+      for (int j = 0; j < size; ++j) {
+        scan ^= chars[j];
+      }
+      accum += size;
+      scans += scan;
+    }
+    return static_cast<jlong>(accum & scans);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticNativeLongByReturn(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getStaticNativeLongByReturn", "(I)J");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jlong ret = env->CallStaticLongMethod(objClass, method_handle, i);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      accum ^= (ret << 1);
+    }
+    return static_cast<jlong>(accum);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticNativeLongByArg(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getStaticNativeLongByArg", "(IJ)V");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    long ret = 0;
+    jlong retAddr = reinterpret_cast<jlong>(&ret);
+    for (int i = 0; i < numTimes; ++i) {
+      env->CallStaticVoidMethod(objClass, method_handle, i, retAddr);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      accum ^= (ret << 1);
+    }
+    return static_cast<jlong>(accum);
+}
+
+jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStaticNativeFromJava(JNIEnv* env, jclass jcls, jint numtimes) {
+    int numTimes = static_cast<int>(numtimes);
+    long accum = 1;
+    long scans = 1;
+    jclass objClass = env->FindClass("com/evolvedbinary/jnibench/common/StringProviderStatic");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID method_handle = env->GetStaticMethodID(objClass, "getByteNativeAllocate", "(I)J");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID free_method_handle = env->GetStaticMethodID(objClass, "freeByteNative", "(J)V");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    jmethodID length_method_handle = env->GetStaticMethodID(objClass, "getByteLength", "(I)I");
+    ERROR_IF_EXCEPTION_PENDING(env);
+    for (int i = 0; i < numTimes; ++i) {
+      jlong nativeBytes = env->CallStaticLongMethod(objClass, method_handle, i);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (nativeBytes <= 0) {
+        return ERROR_CODE;
+      }
+      jint nativeBytesLength = env->CallStaticIntMethod(objClass, length_method_handle, i);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      if (nativeBytesLength <= 0) {
+        return ERROR_CODE;
+      }
+      jbyte* chars = reinterpret_cast<jbyte*>(nativeBytes);
+      int size = nativeBytesLength;
+      jbyte scan = static_cast<jbyte>(0);
+      for (int j = 0; j < size; ++j) {
+        scan ^= chars[j];
+      }
+      env->CallStaticVoidMethod(objClass, free_method_handle, nativeBytes);
+      ERROR_IF_EXCEPTION_PENDING(env);
+      accum += size;
+      scans += scan;
+    }
+    return static_cast<jlong>(accum & scans);
+}
+
 jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJavaAsNativeUTF16(JNIEnv* env, jclass jcls, jobject obj, jint numtimes) {
     int numTimes = static_cast<int>(numtimes);
     long accum = 1;
@@ -166,7 +345,7 @@ jlong Java_com_evolvedbinary_jnibench_common_FooByCallStaticFinal_getStringFromJ
       jstring jfilename = static_cast<jstring>(env->CallObjectMethod(obj, method_handle, i));
       ERROR_IF_EXCEPTION_PENDING(env);
       if (jfilename == nullptr) {
-        return 0;
+        return ERROR_CODE;
       }
       int size = static_cast<int>(env->GetStringLength(jfilename));
       const jchar* chars = env->GetStringChars(jfilename, nullptr);

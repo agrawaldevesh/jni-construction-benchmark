@@ -1,9 +1,6 @@
 package com.evolvedbinary.jnibench.common;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 
 public class StringProvider {
     private final List<String> strings;
@@ -30,9 +27,10 @@ public class StringProvider {
     private String createString(Random random, int targetStringLength) {
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
-
+        int lowerBoundLength = Math.max(targetStringLength / 3, 2);
+        int length = lowerBoundLength < targetStringLength ? lowerBoundLength + random.nextInt(targetStringLength - lowerBoundLength + 1) : targetStringLength;
         return random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
+                .limit(length)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
     }
@@ -55,6 +53,10 @@ public class StringProvider {
 
     public long getInteresting() {
         return interesting;
+    }
+
+    public int getNumStrings() {
+        return strings.size();
     }
 
     private String postProcess(String input) {
